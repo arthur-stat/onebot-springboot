@@ -4,7 +4,7 @@ import com.arth.bot.service.ActionBuildService;
 import com.arth.bot.service.PrivateCommandService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Service
 public class PrivateCommandServiceImpl implements PrivateCommandService {

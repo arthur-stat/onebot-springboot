@@ -16,11 +16,35 @@ public interface ParseAndRouteService {
     ParsedPayloadDTO parsedRawToDTO(String raw) throws JsonProcessingException;
 
     /**
-     * 命令路由：解析 DTO 并跳转至相应的功能模块
+     * 初步解析 DTO，进入群聊逻辑分支或私聊逻辑分支
      * @param payload
-     * @param SessionId
      * @return 返回 action JSON
      * @throws JsonProcessingException
      */
-    List<String> routingAndReturn(ParsedPayloadDTO payload, String SessionId) throws JsonProcessingException;
+    List<String> parsedAndRouting(ParsedPayloadDTO payload) throws JsonProcessingException;
+
+    /**
+     * 群聊消息处理，路由至具体群聊命令
+     * @param payload
+     * @param plainText
+     * @return
+     * @throws JsonProcessingException
+     */
+    List<String> routeGroupMessage(ParsedPayloadDTO payload, String plainText) throws JsonProcessingException;
+
+    /**
+     * 私聊消息处理，路由至具体私聊命令
+     * @param payload
+     * @param plainText
+     * @return
+     * @throws JsonProcessingException
+     */
+    List<String> routePrivateMessage(ParsedPayloadDTO payload, String plainText) throws JsonProcessingException;
+
+    /**
+     * 命令参数解析器，参考 Linux CLI 实现方式
+     * @param command
+     * @return
+     */
+    List<String> parsedParameters(String command);
 }

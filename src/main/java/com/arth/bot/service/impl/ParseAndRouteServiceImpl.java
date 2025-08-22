@@ -5,11 +5,14 @@ import com.arth.bot.dto.segment.AtSegment;
 import com.arth.bot.dto.segment.ImageSegment;
 import com.arth.bot.dto.segment.MessageSegment;
 import com.arth.bot.dto.segment.TextSegment;
+import com.arth.bot.service.GroupCommandService;
 import com.arth.bot.service.ParseAndRouteService;
+import com.arth.bot.service.PrivateCommandService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -17,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ParseAndRouteServiceImpl implements ParseAndRouteService {
@@ -24,7 +28,10 @@ public class ParseAndRouteServiceImpl implements ParseAndRouteService {
     private final ObjectMapper objectMapper;
 
     @Resource
-    private final ActionBuildServiceImpl actionBuildService;
+    private final GroupCommandService groupCommandService;
+
+    @Resource
+    private final PrivateCommandService privateCommandService;
 
     @Override
     public ParsedPayloadDTO parsedRawToDTO(String raw) throws JsonProcessingException {
@@ -43,7 +50,7 @@ public class ParseAndRouteServiceImpl implements ParseAndRouteService {
                 }
                 case "at", "mention" -> {
                     AtSegment seg = new AtSegment();
-                    seg.setData(Map.of("qq", data.path("qq").asText(""))); // 某些实现也叫 "user_id"
+                    seg.setData(Map.of("qq", data.path("qq").asText(""))); // "user_id"
                     segments.add(seg);
                 }
                 case "image" -> {
@@ -75,27 +82,52 @@ public class ParseAndRouteServiceImpl implements ParseAndRouteService {
     }
 
     @Override
-    public List<String> routingAndReturn(ParsedPayloadDTO payload, String sessionId) throws JsonProcessingException {
+    public List<String> parsedAndRouting(ParsedPayloadDTO payload) throws JsonProcessingException {
         if (payload == null || !"message".equals(payload.getPostType())) {
             return null;
         }
 
-        // 解析正文
         String plainText = extractPlainText(payload);
-        if (!"/hi".equals(plainText)) {
-            return null;
+
+        return switch (payload.getMessageType()) {
+            case "group" -> routeGroupMessage(payload, plainText);
+            case "private" -> routePrivateMessage(payload, plainText);
+            default -> null;
+        };
+    }
+
+    @Override
+    public List<String> routeGroupMessage(ParsedPayloadDTO payload, String plainText) throws JsonProcessingException {
+        // 命令分支
+        if (plainText != null && plainText.startsWith("/")) {
+            String[] params = plainText.split("\\s+");
+            log.debug("command detected: {}", params[0]);
+
+            switch (params[0]) {
+                case "/hi" -> {
+                    return groupCommandService.hi(payload);
+                }
+                case "/test" -> {
+                    return groupCommandService.test(payload);
+                }
+            }
         }
 
-        if ("group".equals(payload.getMessageType()) && payload.getGroupId() != null) {
-            return List.of(actionBuildService.buildGroupSendStrAction(payload.getGroupId(), "hi"));
-        } else if ("private".equals(payload.getMessageType())) {
-            return List.of(actionBuildService.buildPrivateSendStrAction(payload.getUserId(), "hi"));
-        }
+        return null;
+    }
+
+    @Override
+    public List<String> routePrivateMessage(ParsedPayloadDTO payload, String plainText) throws JsonProcessingException {
+        return null;
+    }
+
+    @Override
+    public List<String> parsedParameters(String command) {
         return null;
     }
 
     /**
-     * 从 segments 中提取正文内容，例如应排除 @username
+     * 从 segments 中提取正文内容，例如应排除 @username，并去除前缀空格（以便判断是否文本属于命令）
      * @param payload
      * @return
      */
@@ -107,8 +139,9 @@ public class ParseAndRouteServiceImpl implements ParseAndRouteService {
                     sb.append(seg.getData().getOrDefault("text", ""));
                 }
             }
-            return sb.toString();
+            return sb.toString().stripLeading();
         }
-        return payload.getRawText() != null ? payload.getRawText() : "";
+        return payload.getRawText() != null ? payload.getRawText().stripLeading() : "";
     }
+
 }

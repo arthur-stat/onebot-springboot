@@ -5,3 +5,8 @@ logging:
   level:
     root: INFO
     com.arth.bot: DEBUG
+
+onebot:
+  websocket:
+    path: /onebot/v11/ws
+    allowed-origins: "*"

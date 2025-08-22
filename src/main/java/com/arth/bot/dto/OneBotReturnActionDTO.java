@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.Map;
 
+/** 遵从 OneBot v11 定义的 action JSON POJO 对象 */
 @Data
 public class OneBotReturnActionDTO {
 

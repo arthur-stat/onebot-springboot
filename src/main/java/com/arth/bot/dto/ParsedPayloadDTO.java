@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.util.List;
 
+/** 用于将传入的 OneBot v11 消息解析 POJO 的 DTO */
 @Data
 public class ParsedPayloadDTO {
 

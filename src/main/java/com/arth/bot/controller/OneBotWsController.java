@@ -1,9 +1,12 @@
 package com.arth.bot.controller;
 
+import com.arth.bot.common.exception.BusinessException;
 import com.arth.bot.dto.ParsedPayloadDTO;
 import com.arth.bot.service.ParseAndRouteService;
+import com.arth.bot.service.session.SessionRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -15,9 +18,11 @@ import java.util.List;
 public class OneBotWsController extends TextWebSocketHandler {
 
     private final ParseAndRouteService parseAndRouteService;
+    private final SessionRegistry sessionRegistry;
 
-    public OneBotWsController(ParseAndRouteService parseAndRouteService) {
+    public OneBotWsController(ParseAndRouteService parseAndRouteService, SessionRegistry sessionRegistry) {
         this.parseAndRouteService = parseAndRouteService;
+        this.sessionRegistry = sessionRegistry;
     }
 
     @Override
@@ -26,26 +31,43 @@ public class OneBotWsController extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        String rawJson = message.getPayload();
-        String sessionId = session.getId();
-        log.debug("received: {}", rawJson);
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+        try {
+            String rawJson = message.getPayload();
+            log.debug("received: {}", rawJson);
 
-        ParsedPayloadDTO dto = parseAndRouteService.parsedRawToDTO(rawJson);
-        List<String> actionJSONs = parseAndRouteService.routingAndReturn(dto, sessionId);
+            ParsedPayloadDTO dto = parseAndRouteService.parsedRawToDTO(rawJson);
+            /* 仅在接收到首个消息时，将 self_id 绑定至相应的 session，以便其他模块例如业务异常处理器通过 ws session 控制 bot 发送消息 */
+            if (session.getAttributes().get("self_id") == null) {
+                long selfId = dto.getSelfId();
+                sessionRegistry.put(selfId, session);
+                session.getAttributes().put("self_id", selfId);
+            }
 
-        if (actionJSONs != null && !actionJSONs.isEmpty()) {
-            synchronized (session) {
-                for (String actionJSON : actionJSONs) {
-                    session.sendMessage(new TextMessage(actionJSON));
-                    log.debug("sent: {}", actionJSON);
+            List<String> actionJSONs = parseAndRouteService.parsedAndRouting(dto);
+            if (actionJSONs != null && !actionJSONs.isEmpty()) {
+                synchronized (session) {
+                    for (String actionJSON : actionJSONs) {
+                        session.sendMessage(new TextMessage(actionJSON));
+                        log.debug("sent: {}", actionJSON);
+                    }
                 }
             }
+        } catch (BusinessException be) {
+            log.warn("business error: {}", be.getMessage());
+        } catch (Exception e) {
+            log.error("WS pipeline error", e);
         }
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
         log.error("Transport error", exception);
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+        sessionRegistry.remove((Long) session.getAttributes().get("self_id"));
+        log.info("websocket connection closed, session ID: {}", session.getId());
     }
 }

@@ -1,9 +1,11 @@
 package com.arth.bot.controller;
 
 import com.arth.bot.common.exception.BusinessException;
-import com.arth.bot.dto.ParsedPayloadDTO;
-import com.arth.bot.service.ParseAndRouteService;
-import com.arth.bot.service.session.SessionRegistry;
+import com.arth.bot.common.dto.ParsedPayloadDTO;
+import com.arth.bot.infrastructure.forwarder.ForwardMessageQueue;
+import com.arth.bot.service.routing.ParseAndRouteService;
+import com.arth.bot.infrastructure.SessionRegistry;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.CloseStatus;
@@ -15,15 +17,12 @@ import java.util.List;
 
 @Slf4j
 @Controller
+@RequiredArgsConstructor
 public class OneBotWsController extends TextWebSocketHandler {
 
     private final ParseAndRouteService parseAndRouteService;
     private final SessionRegistry sessionRegistry;
-
-    public OneBotWsController(ParseAndRouteService parseAndRouteService, SessionRegistry sessionRegistry) {
-        this.parseAndRouteService = parseAndRouteService;
-        this.sessionRegistry = sessionRegistry;
-    }
+    private final ForwardMessageQueue forwardMessageQueue;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -32,6 +31,9 @@ public class OneBotWsController extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+
+
+
         try {
             String rawJson = message.getPayload();
             log.debug("received: {}", rawJson);
@@ -43,6 +45,9 @@ public class OneBotWsController extends TextWebSocketHandler {
                 sessionRegistry.put(selfId, session);
                 session.getAttributes().put("self_id", selfId);
             }
+
+            /* 转发器的消息队列 */
+            forwardMessageQueue.offer(dto);
 
             List<String> actionJSONs = parseAndRouteService.parsedAndRouting(dto);
             if (actionJSONs != null && !actionJSONs.isEmpty()) {

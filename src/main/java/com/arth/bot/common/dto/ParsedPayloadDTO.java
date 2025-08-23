@@ -1,6 +1,6 @@
-package com.arth.bot.dto;
+package com.arth.bot.common.dto;
 
-import com.arth.bot.dto.segment.MessageSegment;
+import com.arth.bot.common.dto.segment.MessageSegment;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
 
@@ -30,5 +30,7 @@ public class ParsedPayloadDTO {
 
     private List<MessageSegment> segments;
 
-    private JsonNode raw;
+    private JsonNode rawRoot;
+
+    private String originalJsonString;
 }

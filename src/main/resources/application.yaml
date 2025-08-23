@@ -1,0 +1,18 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    com.arth.bot: DEBUG
+
+onebot:
+  websocket:
+    path: /onebot/v11/ws
+    allowed-origins: "*"
+
+forwarder:
+  enabled: true
+  targets:
+    - url: "ws://127.0.0.1:8000/ws"
+      matcher: defaultForwardMatcher

@@ -1,13 +1,13 @@
-package com.arth.bot.service.impl;
+package com.arth.bot.service.routing.impl;
 
-import com.arth.bot.dto.ParsedPayloadDTO;
-import com.arth.bot.dto.segment.AtSegment;
-import com.arth.bot.dto.segment.ImageSegment;
-import com.arth.bot.dto.segment.MessageSegment;
-import com.arth.bot.dto.segment.TextSegment;
-import com.arth.bot.service.GroupCommandService;
-import com.arth.bot.service.ParseAndRouteService;
-import com.arth.bot.service.PrivateCommandService;
+import com.arth.bot.common.dto.ParsedPayloadDTO;
+import com.arth.bot.common.dto.segment.AtSegment;
+import com.arth.bot.common.dto.segment.ImageSegment;
+import com.arth.bot.common.dto.segment.MessageSegment;
+import com.arth.bot.common.dto.segment.TextSegment;
+import com.arth.bot.service.routing.GroupCommandRoutingService;
+import com.arth.bot.service.routing.ParseAndRouteService;
+import com.arth.bot.service.routing.PrivateCommandRoutingService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,10 +28,10 @@ public class ParseAndRouteServiceImpl implements ParseAndRouteService {
     private final ObjectMapper objectMapper;
 
     @Resource
-    private final GroupCommandService groupCommandService;
+    private final GroupCommandRoutingService groupCommandRoutingService;
 
     @Resource
-    private final PrivateCommandService privateCommandService;
+    private final PrivateCommandRoutingService privateCommandRoutingService;
 
     @Override
     public ParsedPayloadDTO parsedRawToDTO(String raw) throws JsonProcessingException {
@@ -77,7 +77,8 @@ public class ParseAndRouteServiceImpl implements ParseAndRouteService {
         payload.setRawText(root.path("raw_message").asText(""));
         payload.setSenderRole(root.path("sender").path("role").asText(""));
         payload.setSegments(segments);
-        payload.setRaw(root);
+        payload.setRawRoot(root);
+        payload.setOriginalJsonString(raw);
         return payload;
     }
 
@@ -105,10 +106,10 @@ public class ParseAndRouteServiceImpl implements ParseAndRouteService {
 
             switch (params[0]) {
                 case "/hi" -> {
-                    return groupCommandService.hi(payload);
+                    return groupCommandRoutingService.hi(payload);
                 }
                 case "/test" -> {
-                    return groupCommandService.test(payload);
+                    return groupCommandRoutingService.test(payload);
                 }
             }
         }

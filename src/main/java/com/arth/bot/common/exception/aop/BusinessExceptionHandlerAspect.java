@@ -1,9 +1,9 @@
 package com.arth.bot.common.exception.aop;
 
 import com.arth.bot.common.exception.*;
-import com.arth.bot.dto.ParsedPayloadDTO;
-import com.arth.bot.service.ActionBuildService;
-import com.arth.bot.service.session.SessionRegistry;
+import com.arth.bot.common.dto.ParsedPayloadDTO;
+import com.arth.bot.utils.ActionBuildUtil;
+import com.arth.bot.infrastructure.SessionRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -25,7 +25,7 @@ import java.io.IOException;
 public class BusinessExceptionHandlerAspect {
 
     private final SessionRegistry sessionRegistry;
-    private final ActionBuildService actionBuildService;
+    private final ActionBuildUtil actionBuildUtil;
 
     /**
      * 切点范围为以参数名 payload 作为首个参数的 service 下的所有类的全部方法
@@ -34,7 +34,7 @@ public class BusinessExceptionHandlerAspect {
      * @return
      * @throws Throwable
      */
-    @Around("execution(* com.arth.bot.service.*.*(..)) && args(payload, ..)")
+    @Around("execution(* com.arth.bot.service..*.*(..)) && args(payload, ..)")
     public Object around(ProceedingJoinPoint joinPoint, ParsedPayloadDTO payload) throws Throwable {
         try {
             return joinPoint.proceed();
@@ -57,6 +57,7 @@ public class BusinessExceptionHandlerAspect {
     }
 
     private void sendBusinessExceptionBack(BusinessException e, ParsedPayloadDTO payload) {
+        System.out.println(222);
         String description = e.getDescription();
         if (description == null || description.isEmpty()) return;
 
@@ -68,8 +69,8 @@ public class BusinessExceptionHandlerAspect {
         try {
             synchronized (session) {
                 String actionJson = payload.getMessageType().equals("group") ?
-                        actionBuildService.buildGroupSendStrAction(payload.getGroupId(), description) :
-                        actionBuildService.buildPrivateSendStrAction(payload.getUserId(), description);
+                        actionBuildUtil.buildGroupSendStrAction(payload.getGroupId(), description) :
+                        actionBuildUtil.buildPrivateSendStrAction(payload.getUserId(), description);
                 session.sendMessage(new TextMessage(actionJson));
                 log.debug("send action: {}", actionJson);
             }

@@ -1,7 +1,6 @@
-package com.arth.bot.service.impl;
+package com.arth.bot.utils;
 
-import com.arth.bot.dto.OneBotReturnActionDTO;
-import com.arth.bot.service.ActionBuildService;
+import com.arth.bot.common.dto.OneBotReturnActionDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,16 +12,26 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class ActionBuildServiceImpl implements ActionBuildService {
+public class ActionBuildUtil {
 
     private final ObjectMapper objectMapper;
 
-    @Override
+    /**
+     * 构建纯文本内容的回复群聊 action 的 JSON
+     * @param groupId
+     * @param text
+     * @return
+     */
     public String buildGroupSendStrAction(long groupId, String text) {
         return buildSendMsg("group", Map.of("group_id", groupId), text);
     }
 
-    @Override
+    /**
+     * 构建纯文本内容的回复私聊 action 的 JSON
+     * @param userId
+     * @param text
+     * @return
+     */
     public String buildPrivateSendStrAction(long userId, String text) {
         return buildSendMsg("private", Map.of("user_id", userId), text);
     }

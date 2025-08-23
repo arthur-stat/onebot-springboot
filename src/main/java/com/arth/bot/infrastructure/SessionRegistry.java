@@ -1,4 +1,4 @@
-package com.arth.bot.service.session;
+package com.arth.bot.infrastructure;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;

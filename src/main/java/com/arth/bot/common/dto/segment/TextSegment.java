@@ -1,4 +1,4 @@
-package com.arth.bot.dto.segment;
+package com.arth.bot.common.dto.segment;
 
 import lombok.Data;
 

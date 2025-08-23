@@ -4,7 +4,7 @@ import com.arth.bot.authorization.annotation.AuthInterceptor;
 import com.arth.bot.authorization.model.AuthMode;
 import com.arth.bot.authorization.model.AuthScope;
 import com.arth.bot.common.exception.PermissionDeniedException;
-import com.arth.bot.dto.ParsedPayloadDTO;
+import com.arth.bot.common.dto.ParsedPayloadDTO;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

@@ -1,4 +1,4 @@
-package com.arth.bot.dto;
+package com.arth.bot.common.dto;
 
 import lombok.Data;
 

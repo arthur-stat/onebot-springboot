@@ -1,10 +1,11 @@
-# onebot-springboot-adapter
+# onebot-springboot
 A OneBot v11 protocol backend implemented in Java with Spring Boot.
 
 # Implemented Features
 
-- Identify and route user commands
+- Identify and route user commands (as a WebSocket server)
 - Authorization check
+- Forward (as a WebSocket client, achieve by multi-strategy message queue)
 
 # Version
 
@@ -30,6 +31,16 @@ Spring Boot 3.5.5
 │           AuthScope.java
 │
 ├───common
+│   ├───dto
+│   │   │   OneBotReturnActionDTO.java
+│   │   │   ParsedPayloadDTO.java
+│   │   │
+│   │   └───segment
+│   │           AtSegment.java
+│   │           ImageSegment.java
+│   │           MessageSegment.java
+│   │           TextSegment.java
+│   │
 │   └───exception
 │       │   BusinessException.java
 │       │   CommandNotFoundException.java
@@ -43,6 +54,7 @@ Spring Boot 3.5.5
 │               GlobalRuntimeLoggingAspect.java
 │
 ├───config
+│       ForwarderConfig.java
 │       WebSocketConfig.java
 │
 ├───controller
@@ -54,30 +66,35 @@ Spring Boot 3.5.5
 │           PathVariableController.java
 │           User.java
 │
-├───dto
-│   │   OneBotReturnActionDTO.java
-│   │   ParsedPayloadDTO.java
+├───infrastructure
+│   │   SessionRegistry.java
 │   │
-│   └───segment
-│           AtSegment.java
-│           ImageSegment.java
-│           MessageSegment.java
-│           TextSegment.java
+│   └───forwarder
+│       │   ForwardDispatcher.java
+│       │   ForwardMessageQueue.java
+│       │   UpstreamPool.java
+│       │
+│       └───matcher
+│           │   ForwardMatcher.java
+│           │
+│           └───impl
+│                   DefaultForwardMatcher.java
 │
 ├───mapper
-└───service
-    │   ActionBuildService.java
-    │   GroupCommandService.java
-    │   ParseAndRouteService.java
-    │   PrivateCommandService.java
-    │
-    ├───impl
-    │       ActionBuildServiceImpl.java
-    │       GroupCommandServiceImpl.java
-    │       ParseAndRouteServiceImpl.java
-    │       PrivateCommandServiceImpl.java
-    │
-    └───session
-            SessionRegistry.java
+├───service
+│   ├───routing
+│   │   │   GroupCommandRoutingService.java
+│   │   │   ParseAndRouteService.java
+│   │   │   PrivateCommandRoutingService.java
+│   │   │
+│   │   └───impl
+│   │           GroupCommandRoutingServiceImpl.java
+│   │           ParseAndRouteServiceImpl.java
+│   │           PrivateCommandRoutingServiceImpl.java
+│   │
+│   └───test
+└───utils
+        ActionBuildUtil.java
+        ForwardMatcherRegistry.java
 ```
 

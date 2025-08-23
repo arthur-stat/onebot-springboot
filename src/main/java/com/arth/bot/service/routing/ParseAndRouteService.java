@@ -1,6 +1,6 @@
-package com.arth.bot.service;
+package com.arth.bot.service.routing;
 
-import com.arth.bot.dto.ParsedPayloadDTO;
+import com.arth.bot.common.dto.ParsedPayloadDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import java.util.List;

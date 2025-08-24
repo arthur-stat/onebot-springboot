@@ -2,8 +2,8 @@ package com.arth.bot.common.exception.aop;
 
 import com.arth.bot.common.exception.*;
 import com.arth.bot.common.dto.ParsedPayloadDTO;
-import com.arth.bot.utils.ActionBuildUtil;
-import com.arth.bot.infrastructure.SessionRegistry;
+import com.arth.bot.common.util.ActionBuildUtil;
+import com.arth.bot.infrastructure.websocket.SessionRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

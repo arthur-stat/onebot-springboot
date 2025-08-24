@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.arth.bot.mapper.TSubscriptionMapper">
+
+    <resultMap id="BaseResultMap" type="com.arth.bot.entity.TSubscription">
+            <id property="id" column="id" />
+            <result property="scope" column="scope" />
+            <result property="userId" column="user_id" />
+            <result property="groupId" column="group_id" />
+            <result property="serviceKey" column="service_key" />
+            <result property="params" column="params" />
+            <result property="scheduleCron" column="schedule_cron" />
+            <result property="enabled" column="enabled" />
+            <result property="createdAt" column="created_at" />
+            <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,scope,user_id,group_id,service_key,params,
+        schedule_cron,enabled,created_at,updated_at
+    </sql>
+</mapper>

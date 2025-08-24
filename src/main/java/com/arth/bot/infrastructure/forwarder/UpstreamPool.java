@@ -2,9 +2,9 @@ package com.arth.bot.infrastructure.forwarder;
 
 import com.arth.bot.common.dto.ParsedPayloadDTO;
 import com.arth.bot.config.ForwarderConfig;
-import com.arth.bot.infrastructure.SessionRegistry;
+import com.arth.bot.infrastructure.websocket.SessionRegistry;
 import com.arth.bot.infrastructure.forwarder.matcher.ForwardMatcher;
-import com.arth.bot.utils.ForwardMatcherRegistry;
+import com.arth.bot.common.util.ForwardMatcherRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

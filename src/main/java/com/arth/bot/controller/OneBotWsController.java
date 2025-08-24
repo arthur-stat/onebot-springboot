@@ -1,6 +1,5 @@
 package com.arth.bot.controller;
 
-import com.arth.bot.common.exception.BusinessException;
 import com.arth.bot.common.dto.ParsedPayloadDTO;
 import com.arth.bot.infrastructure.forwarder.ForwardMessageQueue;
 import com.arth.bot.application.routing.ParseAndRouteService;
@@ -13,7 +12,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Controller
@@ -23,6 +22,7 @@ public class OneBotWsController extends TextWebSocketHandler {
     private final ParseAndRouteService parseAndRouteService;
     private final SessionRegistry sessionRegistry;
     private final ForwardMessageQueue forwardMessageQueue;
+    private final ExecutorService executorService;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -30,44 +30,43 @@ public class OneBotWsController extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
-
-
-
+    public void handleTextMessage(WebSocketSession session, TextMessage message) {
         try {
-            String rawJson = message.getPayload();
-            log.debug("received: {}", rawJson);
+            String raw = message.getPayload();
+            ParsedPayloadDTO dto = parseAndRouteService.parseRawToDTO(raw);
 
-            ParsedPayloadDTO dto = parseAndRouteService.parsedRawToDTO(rawJson);
-            /* 仅在接收到首个消息时，将 self_id 绑定至相应的 session，以便其他模块例如业务异常处理器通过 ws session 控制 bot 发送消息 */
             if (session.getAttributes().get("self_id") == null) {
                 long selfId = dto.getSelfId();
                 sessionRegistry.put(selfId, session);
                 session.getAttributes().put("self_id", selfId);
             }
 
-            /* 转发器的消息队列 */
             forwardMessageQueue.offer(dto);
 
-            List<String> actionJSONs = parseAndRouteService.parsedAndRouting(dto);
-            if (actionJSONs != null && !actionJSONs.isEmpty()) {
-                synchronized (session) {
-                    for (String actionJSON : actionJSONs) {
-                        session.sendMessage(new TextMessage(actionJSON));
-                        log.debug("sent: {}", actionJSON);
+            /* 多线程异步解析命令 */
+            executorService.execute(() -> {
+                try {
+                    var outs = parseAndRouteService.initialRoute(dto);
+                    if (outs != null && !outs.isEmpty() && session.isOpen()) {
+                        synchronized (session) {
+                            for (String json : outs) {
+                                session.sendMessage(new TextMessage(json));
+                            }
+                        }
                     }
+                } catch (Exception e) {
+                    log.error("async handle error", e);
                 }
-            }
-        } catch (BusinessException be) {
-            log.warn("business error: {}", be.getMessage());
+            });
+
         } catch (Exception e) {
-            log.error("WS pipeline error", e);
+            log.error("WebSocket pipeline error", e);
         }
     }
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
-        log.error("Transport error", exception);
+        log.error("transport error", exception);
     }
 
     @Override

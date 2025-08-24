@@ -10,7 +10,6 @@ import org.apache.ibatis.annotations.Mapper;
 * @createDate 2025-08-24 13:01:00
 * @Entity com.arth.bot.domain.model.Membership
 */
-@Mapper
 public interface MembershipMapper extends BaseMapper<Membership> {
 
 }

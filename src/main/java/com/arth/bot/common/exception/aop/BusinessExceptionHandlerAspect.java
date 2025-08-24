@@ -34,7 +34,7 @@ public class BusinessExceptionHandlerAspect {
      * @return
      * @throws Throwable
      */
-    @Around("execution(* com.arth.bot.service..*.*(..)) && args(payload, ..)")
+    @Around("execution(* com.arth.bot.application..*Service.*(..)) && args(payload, ..)")
     public Object around(ProceedingJoinPoint joinPoint, ParsedPayloadDTO payload) throws Throwable {
         try {
             return joinPoint.proceed();

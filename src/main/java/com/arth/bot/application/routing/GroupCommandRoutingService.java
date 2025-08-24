@@ -8,5 +8,7 @@ public interface GroupCommandRoutingService {
 
     List<String> hi(ParsedPayloadDTO payload);
 
-    List<String> test(ParsedPayloadDTO payload);
+    List<String> test1(ParsedPayloadDTO payload);
+
+    List<String> test2(ParsedPayloadDTO payload);
 }

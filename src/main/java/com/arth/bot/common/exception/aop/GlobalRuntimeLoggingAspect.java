@@ -17,11 +17,11 @@ import org.springframework.stereotype.Component;
 public class GlobalRuntimeLoggingAspect {
     @AfterThrowing(
             pointcut = "execution(* com.arth.bot..*(..))",
-            throwing = "ex"
+            throwing = "e"
     )
-    public void logUnhandled(RuntimeException ex) {
-        if (ex instanceof BusinessException) return;
+    public void logUnhandled(RuntimeException e) {
+        if (e instanceof BusinessException) return;
 
-        log.error("Unhandled runtime exception", ex);
+        log.error("Unhandled runtime exception", e);
     }
 }

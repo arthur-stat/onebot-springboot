@@ -13,7 +13,7 @@ public interface ParseAndRouteService {
      * @return
      * @throws JsonProcessingException
      */
-    ParsedPayloadDTO parsedRawToDTO(String raw) throws JsonProcessingException;
+    ParsedPayloadDTO parseRawToDTO(String raw) throws JsonProcessingException;
 
     /**
      * 初步解析 DTO，进入群聊逻辑分支或私聊逻辑分支
@@ -21,7 +21,7 @@ public interface ParseAndRouteService {
      * @return 返回 action JSON
      * @throws JsonProcessingException
      */
-    List<String> parsedAndRouting(ParsedPayloadDTO payload) throws JsonProcessingException;
+    List<String> initialRoute(ParsedPayloadDTO payload) throws JsonProcessingException;
 
     /**
      * 群聊消息处理，路由至具体群聊命令

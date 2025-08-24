@@ -7,7 +7,7 @@ Please modify the `application.yaml` as needed before starting the project.
 
 # Implemented Features
 
-- Identify and route user commands (as a WebSocket server)
+- Concurrently identify and route user commands (as a WebSocket server)
 - Authorization check
 - Forward (as a WebSocket client, achieve by multi-strategy message queue)
 - Containerized PostgreSQL and Redis support
@@ -50,6 +50,9 @@ psql -U app -d appdb
 # Enter the sh interactive shell of the Redis container
 docker exec -it dev-redis sh
 redis-cli
+
+# Shutdown all containers
+docker stop $(docker ps -q)
 ```
 
 # Project Structure

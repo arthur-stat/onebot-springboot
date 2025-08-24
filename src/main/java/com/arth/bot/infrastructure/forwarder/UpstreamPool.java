@@ -7,6 +7,7 @@ import com.arth.bot.infrastructure.forwarder.matcher.ForwardMatcher;
 import com.arth.bot.common.util.ForwardMatcherRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -109,7 +110,16 @@ public class UpstreamPool {
             client.execute(this, headers, URI.create(url))
                     .thenAccept(s -> log.info("[forwarder] connected: {}", url))
                     .exceptionally(e -> {
-                        log.error("[forwarder] failed {}: {}", url, e.toString(), e);
+                        Throwable t = (e instanceof java.util.concurrent.CompletionException
+                                || e instanceof java.util.concurrent.ExecutionException) && e.getCause() != null
+                                ? e.getCause() : e;
+                        Throwable root = NestedExceptionUtils.getMostSpecificCause(t);
+
+                        log.warn("[forwarder] connect failed url={} : {}", url, root.toString());
+
+//                        if (log.isDebugEnabled()) {
+//                            log.debug("[forwarder] connect failed stack url={}", url, e);
+//                        }
                         return null;
                     });
         }
@@ -167,7 +177,11 @@ public class UpstreamPool {
 
         @Override
         public void handleTransportError(WebSocketSession session, Throwable exception) {
-            log.warn("[forwarder] transport error {}: {}", url, exception.toString(), exception);
+            Throwable root = NestedExceptionUtils.getMostSpecificCause(exception);
+            log.warn("[forwarder] transport error url={} : {}", url, root.toString());
+            if (log.isDebugEnabled()) {
+                log.debug("[forwarder] transport stack url={}", url, exception);
+            }
         }
 
         @Override

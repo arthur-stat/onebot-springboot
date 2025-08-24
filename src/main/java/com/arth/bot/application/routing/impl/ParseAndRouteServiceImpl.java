@@ -34,7 +34,7 @@ public class ParseAndRouteServiceImpl implements ParseAndRouteService {
     private final PrivateCommandRoutingService privateCommandRoutingService;
 
     @Override
-    public ParsedPayloadDTO parsedRawToDTO(String raw) throws JsonProcessingException {
+    public ParsedPayloadDTO parseRawToDTO(String raw) throws JsonProcessingException {
         JsonNode root = objectMapper.readTree(raw);
         List<MessageSegment> segments = new ArrayList<>();
 
@@ -83,7 +83,7 @@ public class ParseAndRouteServiceImpl implements ParseAndRouteService {
     }
 
     @Override
-    public List<String> parsedAndRouting(ParsedPayloadDTO payload) throws JsonProcessingException {
+    public List<String> initialRoute(ParsedPayloadDTO payload) throws JsonProcessingException {
         if (payload == null || !"message".equals(payload.getPostType())) {
             return null;
         }
@@ -108,8 +108,11 @@ public class ParseAndRouteServiceImpl implements ParseAndRouteService {
                 case "/hi" -> {
                     return groupCommandRoutingService.hi(payload);
                 }
-                case "/test" -> {
-                    return groupCommandRoutingService.test(payload);
+                case "/test1" -> {
+                    return groupCommandRoutingService.test1(payload);
+                }
+                case "/test2" -> {
+                    return groupCommandRoutingService.test2(payload);
                 }
             }
         }

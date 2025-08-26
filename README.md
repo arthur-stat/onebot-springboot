@@ -7,6 +7,7 @@ Please modify the `application.yaml` as needed before starting the project.
 
 # Implemented Features
 
+- Modular Design (Core, Adapter and Plugins)
 - Concurrently identify and route user commands (as a WebSocket server)
 - Authorization check
 - Forward (as a WebSocket client, achieve by multi-strategy message queue)
@@ -41,7 +42,7 @@ The SQL table initialization file (.sql) is located at the path: `bot/src/main/r
 
 ```bash
 # Start containers (and build if not exists) in detached mode
-docker compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yaml up -d
 
 # Enter the bash interactive shell of the PostgreSQL container
 docker exec -it dev-postgres bash
@@ -58,33 +59,39 @@ docker stop $(docker ps -q)
 # Project Structure
 
 ```
-├───application
-│   ├───other_application_such_as_imgtool
+├───adapter
+│   ├───controller
+│   ├───parser
+│   │   └───impl
+│   ├───sender
+│   │   ├───action
+│   │   │   └───impl
+│   │   └───impl
+│   └───session
+├───core
+│   ├───authorization
+│   │   ├───annotation
+│   │   ├───aop
+│   │   └───model
+│   ├───common
+│   │   ├───dto
+│   │   │   └───segment
+│   │   ├───exception
+│   │   │   └───aop
+│   │   └───util
+│   ├───config
+│   │   └───dev
+│   ├───domain
+│   │   ├───model
+│   │   └───service
+│   │       └───impl
+│   ├───infrastructure
+│   │   ├───forwarder
+│   │   │   └───matcher
+│   │   │       └───impl
+│   │   └───persistence
+│   ├───mapper
 │   └───routing
-│       └───impl
-├───authorization
-│   ├───annotation
-│   ├───aop
-│   └───model
-├───common
-│   ├───dto
-│   │   └───segment
-│   ├───exception
-│   │   └───aop
-│   └───util
-├───config
-│   └───dev
-├───controller
-├───domain
-│   ├───model
-│   └───service
-│       └───impl
-└───infrastructure
-    ├───forwarder
-    │   └───matcher
-    │       └───impl
-    ├───persistence
-    │   └───mapper
-    └───websocket
+└───plugins
 ```
 

@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.arth.bot.infrastructure.persistence.mapper.GroupMapper">
+<mapper namespace="com.arth.bot.core.mapper.GroupMapper">
 
-    <resultMap id="BaseResultMap" type="com.arth.bot.domain.model.Group">
+    <resultMap id="BaseResultMap" type="com.arth.bot.core.domain.model.Group">
             <id property="id" column="id" />
             <result property="platform" column="platform" />
             <result property="openId" column="open_id" />

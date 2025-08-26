@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.arth.bot.infrastructure.persistence.mapper.SubscriptionMapper">
+<mapper namespace="com.arth.bot.core.mapper.SubscriptionMapper">
 
-    <resultMap id="BaseResultMap" type="com.arth.bot.domain.model.Subscription">
+    <resultMap id="BaseResultMap" type="com.arth.bot.core.domain.model.Subscription">
             <id property="id" column="id" />
             <result property="scope" column="scope" />
             <result property="userId" column="user_id" />

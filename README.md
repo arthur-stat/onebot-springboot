@@ -5,6 +5,10 @@ Please modify the `application.yaml` as needed before starting the project.
 
 > The project currently focuses primarily on adaptation for QQ bots. Theoretically, it should work with any platform that supports the OneBot v11 protocol, though some code modifications may be required for broader and more universal compatibility.
 
+# How to Use?
+
+You only need to refer to the example code under the *plugins* module to add and write commands for your own bot. The *core* and *forwarder* will operate according to the configuration file.
+
 # Implemented Features
 
 - Modular Design (Core, Adapter and Plugins)
@@ -13,7 +17,7 @@ Please modify the `application.yaml` as needed before starting the project.
 - Forward (as a WebSocket client, achieve by multi-strategy message queue)
 - Containerized PostgreSQL and Redis support
 
-# Version
+# Version Dependencies
 
 OpenJDK 17+
 

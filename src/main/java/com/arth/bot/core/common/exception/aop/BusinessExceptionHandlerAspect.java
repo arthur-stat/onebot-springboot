@@ -59,6 +59,6 @@ public class BusinessExceptionHandlerAspect {
         String description = e.getDescription();
         if (description == null || description.isBlank()) return;
 
-        sender.sendText(payload, description);
+        sender.responseText(payload, description);
     }
 }

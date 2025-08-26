@@ -5,6 +5,7 @@ import com.arth.bot.core.common.exception.BusinessException;
 import com.arth.bot.core.common.exception.CommandNotFoundException;
 import com.arth.bot.core.common.exception.InternalServerErrorException;
 import com.arth.bot.core.common.exception.InvalidCommandArgsException;
+import com.arth.bot.plugins.DefaultStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class CommandInvoker {
 
     private final ApplicationContext ctx;
+    private final DefaultStrategy defaultStrategy;
 
     /**
      * 命令优先级得分
@@ -100,8 +102,13 @@ public class CommandInvoker {
      * @return
      */
     private String extractLeadingSlashCommand(ParsedPayloadDTO payload) {
-        String text = Optional.ofNullable(payload.getRawText()).orElse("").trim();
-        if (!text.startsWith("/")) return null;
+        String rowText = payload.getRawText();
+        if (rowText == null || rowText.isEmpty()) return null;
+        if (!rowText.startsWith("/")) {
+            if (defaultStrategy != null) defaultStrategy.defaultHandle(payload);
+            return null;
+        }
+        String text = rowText.trim();  // String text = Optional.of(rowText).orElse("").trim();
         int nl = text.indexOf('\n');
         return nl >= 0 ? text.substring(0, nl).trim() : text;
     }

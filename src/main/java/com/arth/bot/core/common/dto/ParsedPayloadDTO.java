@@ -25,8 +25,10 @@ public class ParsedPayloadDTO {
     /* 群聊 ID */
     private Long groupId;
 
+    /* 消息 ID，用于回复 */
     private long messageId;
 
+    /* 消息时间 */
     private long time;
 
     /* 原始报文中携带的纯文本段字段内容 */

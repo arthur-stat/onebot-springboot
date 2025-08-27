@@ -1,5 +1,5 @@
 # onebot-springboot
-A OneBot v11 protocol backend implemented in Java with Spring Boot 3.
+A OneBot v11 protocol backend framework implemented in Java with Spring Boot 3.
 
 Please modify the `application.yaml` as needed before starting the project.
 
@@ -14,8 +14,8 @@ You only need to refer to the example code under the *plugins* module to add and
 - Modular Design (Core, Adapter and Plugins)
 - Concurrently identify and route user commands (as a WebSocket server)
 - Authorization check
-- Forward (as a WebSocket client, achieve by multi-strategy message queue)
-- Containerized PostgreSQL and Redis support
+- Forward (as a WebSocket client, achieve by in-process message queue (MPSC))
+- PostgreSQL and Redis support (containerized)
 
 # Version Dependencies
 
@@ -25,9 +25,9 @@ Spring Boot 3.5
 
 Docker 27.5
 
-PostgreSQL 16 (docker)
+PostgreSQL 16
 
-Redis 7 (docker)
+Redis 7
 
 # Recommend Bot Protocol Client
 
@@ -65,13 +65,19 @@ docker stop $(docker ps -q)
 ```
 ├───adapter
 │   ├───controller
+│   ├───fetcher
+│   │   └───impl
+│   ├───forwarder
+│   │   └───matcher
+│   │       └───impl
 │   ├───parser
 │   │   └───impl
 │   ├───sender
 │   │   ├───action
 │   │   │   └───impl
 │   │   └───impl
-│   └───session
+│   ├───session
+│   └───util
 ├───core
 │   ├───authorization
 │   │   ├───annotation
@@ -79,10 +85,10 @@ docker stop $(docker ps -q)
 │   │   └───model
 │   ├───common
 │   │   ├───dto
-│   │   │   └───segment
-│   │   ├───exception
-│   │   │   └───aop
-│   │   └───util
+│   │   │   ├───message
+│   │   │   └───replay
+│   │   └───exception
+│   │       └───aop
 │   ├───config
 │   │   └───dev
 │   ├───domain
@@ -90,12 +96,9 @@ docker stop $(docker ps -q)
 │   │   └───service
 │   │       └───impl
 │   ├───infrastructure
-│   │   ├───forwarder
-│   │   │   └───matcher
-│   │   │       └───impl
 │   │   └───persistence
-│   ├───mapper
-│   └───routing
+│   ├───invoker
+│   └───mapper
 └───plugins
 ```
 

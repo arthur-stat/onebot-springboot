@@ -1,4 +1,4 @@
-package com.arth.bot.core.routing;
+package com.arth.bot.core.invoker;
 
 import com.arth.bot.core.common.dto.ParsedPayloadDTO;
 import lombok.Data;

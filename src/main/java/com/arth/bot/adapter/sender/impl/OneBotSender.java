@@ -1,9 +1,13 @@
 package com.arth.bot.adapter.sender.impl;
 
+import com.arth.bot.adapter.fetcher.EchoWaiter;
 import com.arth.bot.adapter.sender.Sender;
 import com.arth.bot.adapter.sender.action.ActionBuilder;
 import com.arth.bot.adapter.session.SessionRegistry;
 import com.arth.bot.core.common.dto.ParsedPayloadDTO;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -11,10 +15,14 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 @Slf4j
 @Component
@@ -23,7 +31,9 @@ public class OneBotSender implements Sender {
 
     private final SessionRegistry sessions;
     private final ActionBuilder actionBuilder;
-    private static final com.fasterxml.jackson.databind.ObjectMapper OM = new com.fasterxml.jackson.databind.ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private final ConcurrentHashMap<String, CompletableFuture<JsonNode>> pending = new ConcurrentHashMap<>();
+    private final EchoWaiter echoWaiter;
 
     @Override
     public void sendText(ParsedPayloadDTO payload, Object text) {
@@ -183,7 +193,7 @@ public class OneBotSender implements Sender {
     }
 
     @Override
-    public void sendRawJSON(long selfId, String json) {
+    public void pushActionJSON(long selfId, String json) {
         WebSocketSession session = sessions.get(selfId);
         if (session == null || !session.isOpen()) {
             log.warn("[adapter] raw json send: session missing/closed, selfId={}", selfId);
@@ -196,6 +206,32 @@ public class OneBotSender implements Sender {
                 log.warn("[adapter] raw json send failed, selfId={}", selfId, e);
             }
         }
+    }
+
+    @Override
+    public JsonNode request(long selfId, String action, JsonNode params, Duration timeout) {
+        String echo = java.util.UUID.randomUUID().toString();
+        echoWaiter.register(echo);
+
+        ObjectNode req = objectMapper.createObjectNode();
+        req.put("action", action);
+        if (params != null) req.set("params", params);
+        req.put("echo", echo);
+
+        pushActionJSON(selfId, req.toString());
+
+        try {
+            String raw = echoWaiter.await(echo, timeout.toMillis()); // 等待 controller 完成的回包
+            return objectMapper.readTree(raw);
+        } catch (Exception e) {
+            throw new RuntimeException("request '" + action + "' failed/timeout", e);
+        }
+    }
+
+    @Override
+    public <T> T request(long selfId, String json, JsonNode params, Duration timeout, Function<JsonNode, T> mapper) {
+        JsonNode resp = request(selfId, json, params, timeout);
+        return mapper.apply(resp);
     }
 
     private void sendTextOnce(WebSocketSession session, ParsedPayloadDTO payload, Object o) throws IOException {
@@ -266,7 +302,7 @@ public class OneBotSender implements Sender {
         root.put("params", params);
 
         try {
-            return OM.writeValueAsString(root);
+            return objectMapper.writeValueAsString(root);
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
             throw new RuntimeException("serialize multi-image send failed", e);
         }
@@ -294,7 +330,7 @@ public class OneBotSender implements Sender {
         root.put("params", params);
 
         try {
-            return OM.writeValueAsString(root);
+            return objectMapper.writeValueAsString(root);
         } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
             throw new RuntimeException("serialize multi-image response failed", e);
         }

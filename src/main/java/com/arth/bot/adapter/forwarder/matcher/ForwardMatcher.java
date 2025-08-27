@@ -1,4 +1,4 @@
-package com.arth.bot.core.infrastructure.forwarder.matcher;
+package com.arth.bot.adapter.forwarder.matcher;
 
 import com.arth.bot.core.common.dto.ParsedPayloadDTO;
 import org.springframework.context.annotation.Lazy;

@@ -18,4 +18,6 @@ public class DefaultStrategy {
     public void defaultHandle(ParsedPayloadDTO payload) {
         // sender.sendText(payload, payload.getRawText());
     }
+
+
 }

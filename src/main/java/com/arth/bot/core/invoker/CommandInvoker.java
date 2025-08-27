@@ -1,4 +1,4 @@
-package com.arth.bot.core.routing;
+package com.arth.bot.core.invoker;
 
 import com.arth.bot.core.common.dto.ParsedPayloadDTO;
 import com.arth.bot.core.common.exception.BusinessException;
@@ -61,10 +61,21 @@ public class CommandInvoker {
      * @return
      */
     public Object parseAndInvoke(ParsedPayloadDTO payload) {
-        String line = extractLeadingSlashCommand(payload);
-        if (line == null) return null;
+        String line = payload.getCommandText();
 
-        Parsed parsed = parse(line);
+        if (line == null || line.isBlank()) {
+            if (defaultStrategy != null && "message".equals(payload.getPostType())) {
+                defaultStrategy.defaultHandle(payload);
+            }
+            return null;
+        }
+
+        String lline = line.stripLeading();
+        if (lline.isEmpty() || lline.charAt(0) != '/') {
+            if (defaultStrategy != null) defaultStrategy.defaultHandle(payload);
+            return null;
+        }
+        Parsed parsed = parse(lline);
         Object bean = getPluginBean(parsed.root());
 
         // 收集插件Bean所有可用方法名（忽略大小写），用于后续命令识别
@@ -101,6 +112,7 @@ public class CommandInvoker {
      * @param payload
      * @return
      */
+    @Deprecated
     private String extractLeadingSlashCommand(ParsedPayloadDTO payload) {
         String rowText = payload.getRawText();
         if (rowText == null || rowText.isEmpty()) return null;

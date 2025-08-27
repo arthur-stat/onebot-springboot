@@ -1,6 +1,5 @@
-package com.arth.bot.core.common.util;
+package com.arth.bot.adapter.forwarder.matcher;
 
-import com.arth.bot.core.infrastructure.forwarder.matcher.ForwardMatcher;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.lang.Nullable;

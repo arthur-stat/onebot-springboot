@@ -1,6 +1,10 @@
 package com.arth.bot.adapter.sender;
 
 import com.arth.bot.core.common.dto.ParsedPayloadDTO;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.time.Duration;
+import java.util.function.Function;
 
 public interface Sender {
 
@@ -44,10 +48,23 @@ public interface Sender {
     void sendVideo(ParsedPayloadDTO payload, Object video);
 
     /**
-     * 直接向机器人发送原始的 action JSON，不构造 action
+     * 直接向 bot 推送原始的 action JSON，不构造 action
      * forward 需要该接口
      * @param selfId
      * @param json
      */
-    void sendRawJSON(long selfId, String json);
+    void pushActionJSON(long selfId, String json);
+
+    /**
+     * 向 bot 发起请求，例如请求引用消息的内容
+     * 这依赖于 EchoWaiter 以实现 “请求-响应”
+     * @param selfId
+     * @param action
+     * @param params
+     * @param timeout
+     * @return
+     */
+    JsonNode request(long selfId, String action, JsonNode params, Duration timeout);
+
+    <T> T request(long selfId, String json, JsonNode params, Duration timeout, Function<JsonNode, T> mapper);
 }

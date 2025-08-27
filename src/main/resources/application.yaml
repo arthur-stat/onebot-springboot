@@ -11,6 +11,10 @@ onebot:
     path: /onebot/v11/ws
     allowed-origins: "*"
 
+#core:
+#  business-exception:
+#    behaviour: message
+
 forwarder:
   enabled: true
   targets:

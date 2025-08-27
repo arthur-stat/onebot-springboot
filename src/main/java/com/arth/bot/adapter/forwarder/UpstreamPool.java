@@ -1,10 +1,10 @@
-package com.arth.bot.core.infrastructure.forwarder;
+package com.arth.bot.adapter.forwarder;
 
 import com.arth.bot.adapter.sender.Sender;
 import com.arth.bot.core.common.dto.ParsedPayloadDTO;
-import com.arth.bot.core.common.util.ForwardMatcherRegistry;
+import com.arth.bot.adapter.forwarder.matcher.ForwardMatcherRegistry;
 import com.arth.bot.core.config.ForwarderConfig;
-import com.arth.bot.core.infrastructure.forwarder.matcher.ForwardMatcher;
+import com.arth.bot.adapter.forwarder.matcher.ForwardMatcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.NestedExceptionUtils;
@@ -28,7 +28,7 @@ public class UpstreamPool {
     private final ForwardMatcherRegistry forwardMatcherRegistry;
     private final Sender sender;
 
-    /* ========= 一个 URL 对应唯一一个 WebSocket 客户端 ========= */
+    /* ========= 一个 URL 应对应唯一一个 WebSocket 客户端 ========= */
     private final ConcurrentMap<String, UpstreamClient> clients = new ConcurrentHashMap<>();
 
     public void forward(ForwarderConfig.ForwarderProperties.Target target, ParsedPayloadDTO payload) {
@@ -158,7 +158,7 @@ public class UpstreamPool {
         @Override
         public void handleMessage(WebSocketSession upstream, WebSocketMessage<?> msg) {
             String payload = String.valueOf(msg.getPayload());
-            sender.sendRawJSON(selfId, payload);
+            sender.pushActionJSON(selfId, payload);
         }
 
         @Override

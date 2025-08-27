@@ -1,4 +1,4 @@
-package com.arth.bot.core.common.dto.segment;
+package com.arth.bot.core.common.dto.message;
 
 import java.util.Map;
 

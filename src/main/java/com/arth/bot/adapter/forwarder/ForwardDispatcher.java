@@ -1,4 +1,4 @@
-package com.arth.bot.core.infrastructure.forwarder;
+package com.arth.bot.adapter.forwarder;
 
 import com.arth.bot.core.common.dto.ParsedPayloadDTO;
 import com.arth.bot.core.config.ForwarderConfig;
